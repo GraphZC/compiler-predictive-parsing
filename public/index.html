@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Parsing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto mt-8 px-8">
+        <h1 class="text-4xl font-bold">Predictive Parsing</h1>
+        <hr class="mt-5 mb-4" />
+        <div class="mb-5">
+            <h2 class="text-2xl font-bold">Parsing Table</h2>
+            <table 
+                class="table-auto border-collapse border border-gray-400 mt-4"
+            >
+                <thead>
+                    <tr>
+                        <th class="border border-gray-400 px-4 py-2">Non-Terminal</th>
+                        <th class="border border-gray-400 px-4 py-2">id</th>
+                        <th class="border border-gray-400 px-4 py-2">(</th>
+                        <th class="border border-gray-400 px-4 py-2">)</th>
+                        <th class="border border-gray-400 px-4 py-2">+</th>
+                        <th class="border border-gray-400 px-4 py-2">*</th>
+                        <th class="border border-gray-400 px-4 py-2">$</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">E</td>
+                        <td class="border border-gray-400 px-4 py-2">T.E1</td>
+                        <td class="border border-gray-400 px-4 py-2">T.E1</
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">E1</td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2">+.T.E1</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">T</td>
+                        <td class="border border-gray-400 px-4 py-2">F.T1</td>
+                        <td class="border border-gray-400 px-4 py-2">F.T1</td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">T1</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2">*.F.T1</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                        <td class="border border-gray-400 px-4 py-2">ε</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">F</td>
+                        <td class="border border-gray-400 px-4 py-2">id</td>
+                        <td class="border border-gray-400 px-4 py-2">(E)</td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                        <td class="border border-gray-400 px-4 py-2"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <form class="flex gap-2" onsubmit="predict(event)">
+            <input 
+                type="text" 
+                id="input-string" 
+                class="border border-gray-300 bg-white py-2 px-3 pr-16 rounded-md focus:outline-none w-full focus:border-gray-400 transition duration-500 ease-in-out" 
+                placeholder="Enter the string" 
+                required
+            />
+            <input 
+                type="text" 
+                id="start-state" 
+                class="border border-gray-300 bg-white py-2 px-3 pr-16 rounded-md focus:outline-none w-full focus:border-gray-400 transition duration-500 ease-in-out" 
+                placeholder="Start state" 
+                required
+            />
+            <button 
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
+            >
+                Predict
+            </button> 
+        </form>
+
+        <div class="mt-5 hidden" id="output">
+            <h2 class="text-2xl font-bold">Output</h2>
+            <div id="output-text" class="border border-gray-400 px-4 py-2 mt-4"></div>
+        </div>
+    </div>
+    <script src="script/predictive.js"></script>
+    <script type="text/javascript">
+        const parsingTable = {
+            E: { id: "T.E1", "(": "T.E1" },
+            E1: { "+": "+.T.E1", ")": "epsilon", $: "epsilon" },
+            T: { id: "F.T1", "(": "F.T1" },
+            T1: { "+": "epsilon", "*": "*.F.T1", ")": "epsilon", $: "epsilon" },
+            F: { id: "id", "(": "(.E.)" },
+        };
+
+        const terminals = ["id", "(", ")", "+", "*"];
+
+        const predict = (event) => {
+            event.preventDefault();
+
+            const inputString = document.getElementById("input-string");
+            const startState = document.getElementById("start-state");
+            const outputText = document.getElementById("output-text");
+            const output = document.getElementById("output");
+            
+            try {
+                const result = predictiveParsing(inputString.value, parsingTable, terminals, startState.value, true);
+                output.classList.remove("hidden");
+                outputText.innerHTML = `The string <b>${inputString.value}</b> which start from <b>${startState.value}</b> is ${result ? "accepted" : "not accepted"}`;
+                
+            } catch (error) {
+                outputText.innerHTML = error;
+            }
+
+            inputString.value = "";
+            startState.value = "";
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+        apiKey: "AIzaSyAmIaOyxhLbRtQwP2sgbpAcFM0sRyJxWuY",
+        authDomain: "predictive-parsing.firebaseapp.com",
+        projectId: "predictive-parsing",
+        storageBucket: "predictive-parsing.appspot.com",
+        messagingSenderId: "847081020836",
+        appId: "1:847081020836:web:95583595b5728e77ebf531"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+    </script>
+</body>
+</html>
